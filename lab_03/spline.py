@@ -155,14 +155,30 @@ def countPolynom(x, xValues, index, coefs):
     return y
 
 
-def spline(table, x, start, end):
-    xValues = [i.x for i in table]
-    yValues = [i.y for i in table]
+def printSplineFunct(table, x, start, end):
+    xValues = [i.getX() for i in table]
+    yValues = [i.getY() for i in table]
 
-    coefs = calculateCoefsSpline(xValues, yValues, start, end)
+    index = finedIndex(xValues, x)
+    coeffs = calculateCoefsSpline(xValues, yValues, start, end)
+
+    print("x = {:.6g}".format(x))
+
+    print("Ф(x) = {:.6g}".format(coeffs[0][index]), end=" ")
+    for i in range (1, len(coeffs)):
+        print("+ {:.6f}".format(coeffs[i][index]), "* (x -", xValues[index], end=") ")
+
+    y = countPolynom(x, xValues, index, coeffs)
+    print("= {:.6f}".format(y))
+
+def spline(table, x, start, end):
+    xValues = [i.getX() for i in table]
+    yValues = [i.getY() for i in table]
+
+    coeffs = calculateCoefsSpline(xValues, yValues, start, end)
 
     index = finedIndex(xValues, x)
 
-    y = countPolynom(x, xValues, index, coefs)
+    y = countPolynom(x, xValues, index, coeffs)
 
     return y

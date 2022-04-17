@@ -1,15 +1,16 @@
-import numpy as numpy
+from scipy.misc import derivative
+import numpy as np
 from pointClass import *
 
 infinity = None
 
 # нахождение индекса ближайшей точки по значению к искомой
 def getIndex(points, x):
-    dif = abs(points[0].x - x)
+    dif = abs(points[0].getX() - x)
     index = 0
     for i in range(len(points)):
-        if abs(points[i].x - x) < dif:
-            dif = abs(points[i].x - x)
+        if abs(points[i].getX() - x) < dif:
+            dif = abs(points[i].getX() - x)
             index = i
     return index
 
@@ -35,9 +36,9 @@ def getWorkingPoints(points, index, n):
 def NewtonMethod(pointTable):
     countOfRowsOfTableData = 2
     tableOfSub = []
-    [tableOfSub.append([point.x, point.y]) for point in pointTable]
+    [tableOfSub.append([point.getX(), point.getY()]) for point in pointTable]
 
-    tableOfSub = list([list(row) for row in numpy.transpose(tableOfSub)])
+    tableOfSub = list([list(row) for row in np.transpose(tableOfSub)])
     XRow = tableOfSub[0]
     # Добавление столбцов (строк в моей реализации)
     for countOfArgs in range(1, len(XRow)):
@@ -50,7 +51,6 @@ def NewtonMethod(pointTable):
             elif curYRow[j] == infinity:
                 cur = curYRow[j + 1] / (XRow[j] - XRow[j + countOfArgs])
             elif curYRow[j + 1] == infinity:
-                print(2)
                 cur = curYRow[j] / (XRow[j] - XRow[j + countOfArgs])
             else:
                 cur = (curYRow[j] - curYRow[j + 1]) / (XRow[j] - XRow[j + countOfArgs])
@@ -64,6 +64,24 @@ def newtonPolynom(pointTable, n, x):
     subs = NewtonMethod(workingTable)
     return calcApproximateValue(subs, n, x)
 
+def findDerivativeNewtonPolynom(pointTable, n, x):
+    workingTable = getWorkingPoints(pointTable, getIndex(pointTable, x), n)
+    subs = NewtonMethod(workingTable)
+    # printSubTable(subs)
+
+    def aprox_func(x):
+        res = 0
+        for i in range(len(subs)):
+            res += subs[i][0] * x**i
+        return res
+
+    # xValues = [i.getX() for i in pointTable]
+
+    # dx = xValues[1] - xValues[0]
+    # y = [aprox_func(val) for val in xValues]
+    # dydx = np.gradient(y, dx)
+    y_derivative_n_2 = derivative(aprox_func, x, n=2, dx=1e-6)
+    return y_derivative_n_2
 
 # расчет конечного результат по польном Ньютону
 def calcApproximateValue(tableOfSub, n, x):
