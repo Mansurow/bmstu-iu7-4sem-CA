@@ -11,13 +11,13 @@ def generateTable_1D(f, sx, ex, amount):
 
     return dataTable
 
-def generateTable_2D(f, sx, ex, sy, ey, amount):
+def generateTable_2D(f, sx, ex, sy, ey, amountX, amountY):
     dataTable = list()
-    Xvalues = np.linspace(sx, ex, amount + 1)
-    Yvalues = np.linspace(sy, ey, amount + 1)
+    Xvalues = np.linspace(sx, ex, amountX)
+    Yvalues = np.linspace(sy, ey, amountY)
 
-    for i in range(amount):
-        for j in range(amount):
+    for i in range(amountX):
+        for j in range(amountY):
             dataTable.append(Point(Xvalues[i], Yvalues[j], f(Xvalues[i], Yvalues[j]), randint(1, 10)))
 
     return dataTable

@@ -41,7 +41,7 @@ def getIntervalZ(table):
 #-----------------------------------------------------------------
 # Вывод коэффициентов a и СЛАУ
 def printCoeff(coeffValues):
-    print(":")
+    print("Результаты подсчетов коэффициент:")
     for i in range(len(coeffValues)):
         print("a" + str(i) + " = {:10.6g}".format(coeffValues[i]))
 
@@ -124,15 +124,42 @@ def leastSquaresMethod_1D(pointTable, n=1):
 
     return approximateFunction_1D
 
-def drawGraficBy_AproxFunction_1D(approximateFuction, pointTable):
+def reverseFunction_1D(function, x):
+    y = function(x)
+    if y == 0:
+        y = 0
+    else:
+        y = 1 / y
+    return y
+
+def drawGraficBy_AproxFunction_1D(apprFunc, pointTable, reverseApprFunc=False, reversePointTable=[], mode="standart"):
     xMin, xMax = getIntervalX(pointTable)
-    xValues = np.arange(xMin, xMax, 0.02)
-    plt.figure("График функции, полученный аппроксимации наименьших квадратов")
+    xValues = np.linspace(xMin, xMax, 40)
+
+
+    plt.figure("График(и) функции, полученный аппроксимации наименьших квадратов")
     plt.ylabel("Y")
     plt.xlabel("X")
+
     for p in pointTable:
         plt.plot(p.getX(), p.getY(), 'r.')
-    plt.plot(xValues, approximateFuction(xValues), 'k')
+
+    yValues = apprFunc(xValues)
+    plt.plot(xValues, yValues, 'r', label="y = f(x)")
+
+    if mode == "reverseTable":
+        xMin, xMax = getIntervalX(reversePointTable)
+        xValues_reverse = np.arange(xMin, xMax, 0.02)
+
+        for p in reversePointTable:
+            plt.plot(p.getX(), p.getY(), 'g.')
+
+        plt.plot(xValues_reverse, reverseApprFunc(xValues_reverse), 'g', label="x = f(y)")
+    elif mode == "reverseApproxFunc":
+        plt.plot(yValues, xValues, 'g', label="x = f(y)")
+
+
+    plt.legend()
     plt.show()
 #-----------------------------------------------------------------
 
@@ -141,32 +168,31 @@ def drawGraficBy_AproxFunction_1D(approximateFuction, pointTable):
 def findAmountEquations_2D(n):
     return int((n + 1) * (n + 2) / 2)
 
+def getValue_2D(x, y, powx, powy):
+    return x**powx * y**powy
+    # return x**powx * np.exp(y)**powy
+
 def makeSlau_2D(pointTable, n):
     a = list()
     b = list()
     for i in range(n + 1):
         for j in range(n + 1 - i):
-            a_row = list()
+            a_row = []
             for k in range(n + 1):
                 for t in range(n + 1 - k):
-                    a_row.append(sum(
-                        list(map(
-                            lambda point: point.getX() ** (k + i) * point.getY() ** (t + j) * point.getWeight(),
-                            pointTable
-                        ))
-                    ))
+                    a_row.append(sum(list(map(
+                                lambda p: getValue_2D(p.getX(), p.getY(), k + i, t + j) * p.getWeight(),
+                                pointTable
+                    ))))
             a.append(a_row)
-            b.append(
-                sum(list(map(
-                    lambda point: point.getX()**i * point.getY()**j * point.getZ() * point.getWeight(),
-                    pointTable
-                )))
-            )
-
+            b.append(sum(list(map(
+                            lambda p: getValue_2D(p.getX(), p.getY(), i, j) * p.getZ() * p.getWeight(),
+                            pointTable
+            ))))
     slau = list()
     for i in range(len(a)):
-        slau.append(a[i])
-        slau[i].append(b[i])
+       slau.append(a[i])
+       slau[i].append(b[i])
     return slau
 
 def leastSquaresMethod_2D(pointTable, n=1):
@@ -174,21 +200,17 @@ def leastSquaresMethod_2D(pointTable, n=1):
     slau = makeSlau_2D(pointTable, n)
     print("\nМатрица СЛАУ:")
     printMatrix(slau)
-    # c = list(np.linalg.solve(a, b))
-    aValues = Gauss(slau)
-    printCoeff(aValues)
+
+    c = Gauss(slau)
+    printCoeff(c)
 
     def approximateFunction_2D(x, y):
         result = 0
-        x_degree = 1
-        a_index = 0
+        c_index = 0
         for i in range(n + 1):
-            y_degree = 1
-            for _ in range(n + 1 - i):
-                result += aValues[a_index] * x_degree * y_degree
-                y_degree *= y
-                a_index += 1
-            x_degree *= x
+            for j in range(n + 1 - i):
+                result += c[c_index] * getValue_2D(x, y, i, j)
+                c_index += 1
         return result
 
     return approximateFunction_2D
@@ -229,10 +251,10 @@ def drawGraficBy_AproxFunction_2D(approximateFuction, pointTable, n):
     xpoints, ypoints, zpoints = parseTableToCoordinates3D(pointTable)
     axes = fig.add_subplot(projection='3d')
     axes.scatter(xpoints, ypoints, zpoints, c='red')
-    axes.set_xlabel('X')
-    axes.set_ylabel('Y')
-    axes.set_zlabel('Z')
+    axes.set_xlabel('OX')
+    axes.set_ylabel('OY')
+    axes.set_zlabel('OZ')
     xValues, yValues, zValues = make_2D_matrix()
-    axes.plot_wireframe(xValues, yValues, zValues)
+    axes.plot_surface(xValues, yValues, zValues)
     plt.show()
 #-----------------------------------------------------------------
