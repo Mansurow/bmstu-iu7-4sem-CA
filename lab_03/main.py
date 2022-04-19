@@ -19,7 +19,7 @@ start3 = 0
 end3 = 0
 
 yValues = [list(), list(), list(), list()]
-if n < len(pointTable) + 1:
+if n < len(pointTable):
     print("Ньютон 3-й степени:         ", newtonPolynom(pointTable, n + 1, x))
 
     end2 = findDerivativeNewtonPolynom(pointTable, n + 1, pointTable[-1].x)

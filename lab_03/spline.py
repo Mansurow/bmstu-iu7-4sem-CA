@@ -64,8 +64,15 @@ def calcCValues(xValues, yValues, start, end):
     cValues = [0] * (sizeX - 1)
     cValues[0] = start
     cValues[1] = end
-    ksiValues = [start, end]
-    tetaValues = [start, end]
+    if start == 0 and end == 0:
+        ksiValues = [0, 0]
+        tetaValues = [0, 0]
+    elif start == 0:
+        ksiValues = [0, end / 2]
+        tetaValues = [0, end / 2]
+    else:
+        ksiValues = [start / 2, end / 2]
+        tetaValues = [start / 2, end / 2]
 
     for i in range(2, sizeX):
         h2 = xValues[i] - xValues[i - 1]       # hi
